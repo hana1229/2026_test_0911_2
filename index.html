@@ -1,0 +1,1437 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JS STUDIO PROJECT</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <style>
+    * { box-sizing:border-box; }
+
+    :root {
+      --navy:#1A1B2E;
+      --indigo:#42426F;
+      --violet:#6D5BA6;
+      --coral:#F08A8A;
+      --blush:#FFD6C9;
+      --paper:#FFF8F4;
+      --muted:#7B7480;
+      --line:rgba(26,27,46,.12);
+      --shadow:0 16px 42px rgba(26,27,46,.08);
+      --radius:16px;
+      --max:1480px;
+    }
+
+    html { scroll-behavior:smooth; }
+
+    body {
+      margin:0;
+      background:var(--paper);
+      color:var(--navy);
+      font-family:"Inter","Noto Sans KR",sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    a { color:inherit; }
+    button,input { font:inherit; }
+
+    .shell {
+      width:min(var(--max),calc(100% - 40px));
+      margin:0 auto;
+      padding:26px 0 76px;
+    }
+
+    .masthead {
+      padding:12px 0 30px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .mast-kicker {
+      display:flex;
+      align-items:center;
+      gap:13px;
+      margin:0 0 12px;
+      color:var(--coral);
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+    }
+
+    .mast-kicker:before {
+      content:"";
+      width:54px;
+      height:1px;
+      background:var(--coral);
+      opacity:.55;
+    }
+
+    h1 {
+      margin:0;
+      font-size:clamp(3.6rem,7.8vw,8.2rem);
+      line-height:.85;
+      letter-spacing:-.085em;
+      font-weight:900;
+    }
+
+    .main-title { color:var(--navy); }
+    .sub-title { color:var(--coral); }
+
+    .mast-sub {
+      margin:18px 0 0;
+      color:var(--muted);
+      font-size:.70rem;
+      font-weight:700;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+    }
+
+    /* tabs */
+    .sheetbar {
+      position:sticky;
+      top:0;
+      z-index:50;
+      display:flex;
+      justify-content:space-between;
+      align-items:end;
+      gap:18px;
+      margin-top:24px;
+      padding-top:8px;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,248,244,.94);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+
+    .tabs {
+      display:flex;
+      align-items:flex-end;
+      gap:4px;
+    }
+
+    .tab {
+      min-width:72px;
+      appearance:none;
+      border:1px solid var(--line);
+      border-bottom:0;
+      border-radius:11px 11px 0 0;
+      background:#F1E5DF;
+      color:var(--muted);
+      padding:11px 16px 10px;
+      cursor:pointer;
+      font-size:.80rem;
+      font-weight:900;
+      letter-spacing:.06em;
+      transition:.18s ease;
+    }
+
+    .tab:hover { transform:translateY(-1px); }
+
+    .tab.active {
+      background:#fff;
+      color:var(--navy);
+      box-shadow:0 -3px 0 var(--coral) inset;
+    }
+
+    .sheet-meta {
+      padding:0 3px 12px;
+      color:var(--muted);
+      font-size:.69rem;
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .sheet {
+      display:none;
+      padding-top:28px;
+      animation:fade .22s ease;
+    }
+
+    .sheet.active { display:block; }
+
+    @keyframes fade {
+      from { opacity:0; transform:translateY(5px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+
+    .section-head {
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:24px;
+      margin-bottom:24px;
+    }
+
+    .section-copy small {
+      display:block;
+      margin-bottom:7px;
+      color:var(--coral);
+      font-size:.66rem;
+      font-weight:900;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+    }
+
+    .section-copy h2 {
+      margin:0;
+      font-size:clamp(1.95rem,3.2vw,3.25rem);
+      line-height:1.08;
+      letter-spacing:-.052em;
+      font-weight:900;
+    }
+
+    .section-note {
+      max-width:440px;
+      margin:0;
+      color:var(--muted);
+      font-size:.80rem;
+      line-height:1.65;
+    }
+
+    /* search */
+    .search-wrap { width:min(455px,100%); }
+
+    .searchbox {
+      position:relative;
+    }
+
+    .searchbox input {
+      width:100%;
+      height:48px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#fff;
+      padding:0 44px 0 45px;
+      outline:none;
+      color:var(--navy);
+      box-shadow:0 7px 22px rgba(26,27,46,.035);
+    }
+
+    .searchbox input:focus {
+      border-color:rgba(26,27,46,.23);
+      box-shadow:0 0 0 4px rgba(240,138,138,.11);
+    }
+
+    .search-icon {
+      position:absolute;
+      left:16px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--coral);
+    }
+
+    .clear {
+      display:none;
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      width:28px;
+      height:28px;
+      border:0;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+    }
+
+    .clear.show {
+      display:grid;
+      place-items:center;
+    }
+
+    .count {
+      margin-top:8px;
+      padding-right:9px;
+      text-align:right;
+      color:var(--muted);
+      font-size:.70rem;
+    }
+
+    /* NAME */
+    .name-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .member-card {
+      --card-bg:var(--navy);
+      --card-text:#fff;
+      --card-muted:#ddd;
+      --btn-bg:var(--coral);
+      --btn-text:var(--navy);
+      --side-bg:var(--blush);
+      --strip:var(--coral);
+
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:minmax(0,1.22fr) minmax(190px,.78fr);
+      min-height:338px;
+      border-radius:var(--radius);
+      background:var(--card-bg);
+      color:var(--card-text);
+      box-shadow:var(--shadow);
+      transition:transform .18s ease,box-shadow .18s ease;
+    }
+
+    .member-card:hover {
+      transform:translateY(-4px);
+      box-shadow:0 22px 50px rgba(26,27,46,.11);
+    }
+
+    .member-card.hidden { display:none; }
+
+    .member-main {
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      padding:24px 24px 18px;
+    }
+
+    .member-index {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:20px;
+      color:var(--card-muted);
+      font-size:.65rem;
+      font-weight:800;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+    }
+
+    .member-index .dots {
+      display:flex;
+      gap:6px;
+    }
+
+    .member-index i {
+      display:block;
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--strip);
+    }
+
+    .member-index i:last-child {
+      background:var(--side-bg);
+    }
+
+    .member-name {
+      margin:0;
+      font-size:clamp(1.75rem,2.4vw,2.4rem);
+      line-height:1.05;
+      letter-spacing:-.055em;
+      font-weight:900;
+    }
+
+    .member-location {
+      margin:8px 0 0;
+      color:var(--card-muted);
+      font-size:.76rem;
+      font-weight:600;
+    }
+
+    .member-info {
+      display:grid;
+      gap:10px;
+      margin-top:auto;
+      padding-top:22px;
+    }
+
+    .info-row {
+      display:grid;
+      grid-template-columns:72px minmax(0,1fr);
+      gap:10px;
+      align-items:start;
+    }
+
+    .info-label {
+      padding-top:2px;
+      color:var(--card-muted);
+      font-size:.61rem;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .info-value {
+      min-width:0;
+      font-size:.83rem;
+      font-weight:550;
+      line-height:1.45;
+      overflow-wrap:anywhere;
+    }
+
+    .inline {
+      display:flex;
+      align-items:center;
+      gap:7px;
+      min-width:0;
+    }
+
+    .mini-btn {
+      display:inline-grid;
+      place-items:center;
+      min-width:29px;
+      height:29px;
+      padding:0 8px;
+      flex:0 0 auto;
+      border-radius:999px;
+      background:var(--btn-bg);
+      color:var(--btn-text);
+      text-decoration:none;
+      border:1px solid rgba(0,0,0,.05);
+      font-size:.74rem;
+      transition:.15s ease;
+    }
+
+    .mini-btn:hover {
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .mini-btn.disabled {
+      opacity:.28;
+      pointer-events:none;
+    }
+
+    .sns-link {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      color:inherit;
+      text-decoration:none;
+      font-size:.79rem;
+      font-weight:650;
+    }
+
+    .sns-link:hover {
+      text-decoration:underline;
+    }
+
+    .member-visual {
+      overflow:hidden;
+      min-width:0;
+      padding:12px;
+      background:var(--side-bg);
+      border-left:1px solid rgba(255,255,255,.18);
+    }
+
+    .member-visual img {
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+      border-radius:12px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);
+    }
+
+    .member-strip {
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:5px;
+      background:var(--strip);
+    }
+
+    .empty-state {
+      display:none;
+      margin-top:18px;
+      padding:70px 24px;
+      border:1px dashed var(--line);
+      border-radius:var(--radius);
+      color:var(--muted);
+      text-align:center;
+      background:rgba(255,255,255,.32);
+    }
+
+    .empty-state.show { display:block; }
+
+    /* MAP */
+    #map {
+      width:100%;
+      height:min(72vh,680px);
+      min-height:480px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+
+    .leaflet-popup-content {
+      font-family:"Inter","Noto Sans KR",sans-serif;
+      line-height:1.45;
+    }
+
+    .popup-title {
+      font-weight:900;
+      margin-bottom:3px;
+    }
+
+    .map-note,
+    .data-note {
+      margin:10px 2px 0;
+      color:var(--muted);
+      font-size:.68rem;
+      line-height:1.55;
+    }
+
+    /* FOOD */
+    .food-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .food-card {
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      box-shadow:var(--shadow);
+      transition:transform .18s ease,box-shadow .18s ease;
+    }
+
+    .food-card:hover {
+      transform:translateY(-4px);
+      box-shadow:0 22px 50px rgba(26,27,46,.10);
+    }
+
+    .food-image {
+      position:relative;
+      overflow:hidden;
+      aspect-ratio:4/3;
+      background:var(--blush);
+    }
+
+    .food-image img {
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+      transition:transform .24s ease;
+    }
+
+    .food-card:hover .food-image img {
+      transform:scale(1.025);
+    }
+
+    .food-emoji {
+      position:absolute;
+      top:12px;
+      left:12px;
+      display:grid;
+      place-items:center;
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:rgba(255,248,244,.90);
+      box-shadow:0 6px 16px rgba(26,27,46,.10);
+      font-size:1.15rem;
+    }
+
+    .food-body {
+      padding:17px 18px 18px;
+    }
+
+    .food-name {
+      margin:0;
+      font-size:1.30rem;
+      line-height:1.2;
+      letter-spacing:-.04em;
+      font-weight:900;
+    }
+
+    .food-picked {
+      margin:6px 0 14px;
+      color:var(--muted);
+      font-size:.65rem;
+      line-height:1.45;
+    }
+
+    .restaurant-box {
+      padding-top:13px;
+      border-top:1px solid var(--line);
+    }
+
+    .restaurant-kicker {
+      margin:0 0 5px;
+      color:var(--coral);
+      font-size:.61rem;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .restaurant-name {
+      margin:0;
+      font-size:.96rem;
+      font-weight:900;
+      line-height:1.3;
+    }
+
+    .restaurant-meta {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:6px;
+      color:var(--muted);
+      font-size:.68rem;
+      line-height:1.45;
+    }
+
+    .rating {
+      color:var(--violet);
+      font-weight:800;
+    }
+
+    .restaurant-btn {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      margin-top:11px;
+      padding:8px 11px;
+      border-radius:999px;
+      background:var(--navy);
+      color:var(--blush);
+      text-decoration:none;
+      font-size:.70rem;
+      font-weight:800;
+    }
+
+    .restaurant-btn:hover {
+      background:var(--coral);
+      color:var(--navy);
+    }
+
+    /* RECENT */
+    .cinema-shell {
+      padding:26px;
+      border-radius:20px;
+      background:var(--navy);
+      box-shadow:var(--shadow);
+    }
+
+    .cinema-marquee {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:20px;
+      padding:0 2px 18px;
+      color:var(--blush);
+      border-bottom:1px solid rgba(255,214,201,.18);
+    }
+
+    .cinema-marquee strong {
+      font-size:1.08rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .cinema-marquee span {
+      color:#BEB7C0;
+      font-size:.70rem;
+      letter-spacing:.08em;
+    }
+
+    .movie-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:20px;
+      padding-top:22px;
+    }
+
+    .movie-card {
+      min-width:0;
+      color:var(--blush);
+    }
+
+    .poster {
+      position:relative;
+      overflow:hidden;
+      aspect-ratio:2/3;
+      border-radius:12px;
+      background:var(--indigo);
+      box-shadow:0 12px 28px rgba(0,0,0,.26);
+    }
+
+    .poster img {
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+      transition:transform .22s ease;
+    }
+
+    .poster:hover img {
+      transform:scale(1.025);
+    }
+
+    .movie-info {
+      padding:13px 2px 4px;
+    }
+
+    .movie-title {
+      margin:0;
+      font-size:1rem;
+      line-height:1.3;
+      font-weight:900;
+      letter-spacing:-.025em;
+    }
+
+    .movie-meta {
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:7px;
+      margin-top:7px;
+      color:#C8C1C8;
+      font-size:.72rem;
+    }
+
+    .tomato {
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:4px 7px;
+      border-radius:999px;
+      color:var(--navy);
+      background:var(--coral);
+      font-weight:800;
+    }
+
+    .picked {
+      margin-top:9px;
+      color:#9E98A3;
+      font-size:.66rem;
+      line-height:1.5;
+    }
+
+    .movie-actions {
+      margin-top:10px;
+    }
+
+    .movie-btn {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border:1px solid rgba(255,214,201,.24);
+      border-radius:999px;
+      color:var(--blush);
+      text-decoration:none;
+      font-size:.72rem;
+      font-weight:800;
+      transition:.15s ease;
+    }
+
+    .movie-btn:hover {
+      background:var(--coral);
+      border-color:var(--coral);
+      color:var(--navy);
+    }
+
+    /* MUSIC */
+    .music-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .artist-card {
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      box-shadow:var(--shadow);
+    }
+
+    .artist-photo {
+      position:relative;
+      overflow:hidden;
+      aspect-ratio:4/3;
+      background:var(--indigo);
+    }
+
+    .artist-photo img {
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+    }
+
+    .spotify-link {
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      padding:5px 8px;
+      border-radius:999px;
+      background:rgba(26,27,46,.80);
+      color:#fff;
+      text-decoration:none;
+      font-size:.62rem;
+      font-weight:800;
+      backdrop-filter:blur(6px);
+    }
+
+    .artist-body {
+      padding:18px 18px 17px;
+    }
+
+    .artist-name {
+      margin:0;
+      font-size:1.28rem;
+      line-height:1.2;
+      letter-spacing:-.035em;
+      font-weight:900;
+    }
+
+    .artist-picked {
+      margin:5px 0 15px;
+      color:var(--muted);
+      font-size:.66rem;
+    }
+
+    .track-list {
+      list-style:none;
+      margin:0;
+      padding:0;
+      border-top:1px solid var(--line);
+    }
+
+    .track-list li {
+      display:grid;
+      grid-template-columns:26px minmax(0,1fr);
+      gap:8px;
+      padding:9px 0;
+      border-bottom:1px solid var(--line);
+      font-size:.79rem;
+      line-height:1.35;
+    }
+
+    .track-no {
+      color:var(--coral);
+      font-size:.65rem;
+      font-weight:900;
+      padding-top:2px;
+    }
+
+    .music-actions {
+      margin-top:14px;
+    }
+
+    .music-btn {
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:8px 11px;
+      border-radius:999px;
+      background:var(--navy);
+      color:var(--blush);
+      text-decoration:none;
+      font-size:.72rem;
+      font-weight:800;
+    }
+
+    .music-btn:hover {
+      background:var(--coral);
+      color:var(--navy);
+    }
+
+    @media (max-width:1120px) {
+      .name-grid { grid-template-columns:1fr; }
+      .food-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .movie-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .music-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+
+    @media (max-width:760px) {
+      .shell {
+        width:min(100% - 22px,660px);
+        padding-top:14px;
+      }
+
+      h1 {
+        font-size:clamp(3.35rem,16vw,5.8rem);
+      }
+
+      .mast-kicker:before {
+        width:34px;
+      }
+
+      .sheetbar {
+        margin-top:18px;
+        overflow-x:auto;
+      }
+
+      .tabs {
+        flex:0 0 auto;
+      }
+
+      .tab {
+        min-width:58px;
+        padding:10px 12px;
+      }
+
+      .sheet-meta {
+        display:none;
+      }
+
+      .section-head {
+        display:block;
+      }
+
+      .search-wrap {
+        width:100%;
+        margin-top:16px;
+      }
+
+      .member-card {
+        grid-template-columns:minmax(0,1fr) 155px;
+        min-height:355px;
+      }
+
+      .member-main {
+        padding:21px 18px 16px;
+      }
+
+      .info-row {
+        grid-template-columns:60px minmax(0,1fr);
+      }
+
+      .food-grid {
+        grid-template-columns:1fr;
+      }
+
+      .movie-grid {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:16px;
+      }
+
+      .music-grid {
+        grid-template-columns:1fr;
+      }
+
+      #map {
+        min-height:420px;
+      }
+    }
+
+    @media (max-width:500px) {
+      .member-card {
+        grid-template-columns:1fr;
+      }
+
+      .member-visual {
+        height:220px;
+        padding:10px;
+        border-left:0;
+        border-top:1px solid rgba(255,255,255,.18);
+      }
+
+      .cinema-shell {
+        padding:18px;
+      }
+
+      .movie-grid {
+        grid-template-columns:1fr 1fr;
+        gap:13px;
+      }
+
+      .cinema-marquee {
+        display:block;
+      }
+
+      .cinema-marquee span {
+        display:block;
+        margin-top:5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div class="mast-kicker">2026 MEMBER ARCHIVE</div>
+      <h1>
+        <span class="main-title">JS STUDIO</span><br>
+        <span class="sub-title">PROJECT</span>
+      </h1>
+      <p class="mast-sub">SEOULTECH · JS STUDIO PROJECT · 18 MEMBERS</p>
+    </header>
+
+    <nav class="sheetbar" aria-label="project sheets">
+      <div class="tabs">
+        <button class="tab active" data-sheet="nameSheet">NAME</button>
+        <button class="tab" data-sheet="mapSheet" aria-label="우리들은 어디에 있을까요?">🌎</button>
+        <button class="tab" data-sheet="foodSheet" aria-label="좋아하는 음식">🍴</button>
+        <button class="tab" data-sheet="recentSheet" aria-label="최근 본 작품">🎬</button>
+        <button class="tab" data-sheet="musicSheet" aria-label="좋아하는 음악">💿</button>
+      </div>
+      <div class="sheet-meta">JS STUDIO / 2026</div>
+    </nav>
+
+    <!-- NAME -->
+    <section class="sheet active" id="nameSheet">
+      <div class="section-head">
+        <div class="section-copy">
+          <small>Member archive</small>
+          <h2>NAME</h2>
+        </div>
+
+        <div class="search-wrap">
+          <div class="searchbox">
+            <span class="search-icon">⌕</span>
+            <input id="searchInput" type="search"
+              placeholder="이름, 음식, 작품, 가수, SNS 검색"
+              autocomplete="off">
+            <button id="clearSearch" class="clear" aria-label="검색어 지우기">×</button>
+          </div>
+          <div class="count"><strong id="resultCount">18</strong> / 18 MEMBERS</div>
+        </div>
+      </div>
+
+      <div class="name-grid" id="memberCards"></div>
+      <div class="empty-state" id="emptyState">검색 결과가 없습니다.</div>
+    </section>
+
+    <!-- MAP -->
+    <section class="sheet" id="mapSheet">
+      <div class="section-head">
+        <div class="section-copy">
+          <small>Where we live</small>
+          <h2>🌎</h2>
+        </div>
+        <p class="section-note">
+          입력된 동·지역명을 기준으로 표시했습니다. 기숙사 거주자는 서울과학기술대학교로 표시하며 실제 상세 주소는 사용하지 않습니다.
+        </p>
+      </div>
+
+      <div id="map"></div>
+      <p class="map-note">※ 지역 중심점 기준의 대략적인 위치입니다. 마우스 휠로 확대·축소할 수 있습니다.</p>
+    </section>
+
+    <!-- FOOD -->
+    <section class="sheet" id="foodSheet">
+      <div class="section-head">
+        <div class="section-copy">
+          <small>Favorite food archive</small>
+          <h2>FOOD</h2>
+        </div>
+        <p class="section-note">
+          멤버들이 고른 음식을 중복 없이 모았습니다. 각 음식마다 서울에서 찾아볼 수 있는 추천 식당 한 곳을 함께 표시했습니다.
+        </p>
+      </div>
+
+      <div class="food-grid" id="foodGrid"></div>
+      <p class="data-note">추천 식당과 평점은 2026-09-18 공개 검색 결과를 기준으로 구성했습니다. 방문 전 영업정보를 다시 확인해 주세요.</p>
+    </section>
+
+    <!-- RECENT -->
+    <section class="sheet" id="recentSheet">
+      <div class="section-head">
+        <div class="section-copy">
+          <small>Now screening</small>
+          <h2>RECENT</h2>
+        </div>
+        <p class="section-note">
+          멤버들이 최근 본 작품을 하나의 상영 프로그램처럼 묶었습니다. 같은 작품을 고른 멤버는 한 카드에 함께 표시합니다.
+        </p>
+      </div>
+
+      <div class="cinema-shell">
+        <div class="cinema-marquee">
+          <strong>JS STUDIO CINEMA</strong>
+          <span>RECENT PICKS · 11 TITLES</span>
+        </div>
+        <div class="movie-grid" id="movieGrid"></div>
+      </div>
+
+      <p class="data-note">Rotten Tomatoes 수치는 2026-09-18 확인 기준이며, 정확히 대응되는 작품 점수를 확인하기 어려운 경우 N/A로 표시했습니다.</p>
+    </section>
+
+    <!-- MUSIC -->
+    <section class="sheet" id="musicSheet">
+      <div class="section-head">
+        <div class="section-copy">
+          <small>Listening archive</small>
+          <h2>MUSIC</h2>
+        </div>
+        <p class="section-note">
+          멤버들이 고른 아티스트를 모았습니다. 사진을 불러오지 못하는 경우 동일한 컬러 시스템의 그래픽 이미지로 자동 대체됩니다.
+        </p>
+      </div>
+
+      <div class="music-grid" id="musicGrid"></div>
+      <p class="data-note">TOP TRACKS는 현재 공개 스트리밍 데이터를 참고해 대표 3곡으로 정리했습니다.</p>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const members = [{"name": "이병학", "food": "텐동", "foodEmoji": "🍤", "residence": "평촌", "work": "슈퍼뒤에서 담배피우는 두사람", "artist": "스피츠", "sns": "lee____bh", "color": "#DCCFC3", "foodTag": "tempura rice bowl", "workTag": "smoking behind the supermarket with you manga", "foodImage": "https://commons.wikimedia.org/wiki/Special:FilePath/Tendon%20%28Tempura%20over%20rice%29%20%40Daikoku-Ya%2C%20Asakusa%2C%20Tokyo%20%286639224619%29.jpg", "workImage": "https://www.oricon-group.com/upimg/detail/7000/7483/img660/Smoking-Behind-the-Supermarket-with-You.jpg", "workImageLabel": "Smoking Behind the Supermarket with You (2026)", "workSource": "https://www.oricon-group.com/news/7483/", "index": "01", "shortResidence": "평촌", "palette": {"bg": "#B96A55", "accent": "#62C4CE", "text": "#F9EFE7", "soft": "#D58D78"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9IjE3OSIgY3k9IjEwMiIgcj0iNTciIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjE3NyIgY3k9IjUyOCIgcj0iODQiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjM4NSIgY3k9IjQ5NSIgcj0iNjEiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjMyMSIgY3k9IjEzMyIgcj0iNDAiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjkxIiBjeT0iNTQxIiByPSIzMSIgZmlsbD0iIzFBMUIyRSIgZmlsbC1vcGFjaXR5PSIwLjEzIi8+PGNpcmNsZSBjeD0iNTA3IiBjeT0iMzE3IiByPSIzMCIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjIzIi8+PGNpcmNsZSBjeD0iNDc1IiBjeT0iMjc0IiByPSI3NCIgZmlsbD0iIzFBMUIyRSIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+CiAgICAgIDxyZWN0IHg9IjE4MyIgeT0iMjE3IiB3aWR0aD0iMjczIiBoZWlnaHQ9IjE2MiIgcng9IjMyIiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9Ii40MiIgdHJhbnNmb3JtPSJyb3RhdGUoLTYgMzE5LjUgMjk4LjApIi8+CiAgICAgIDxwYXRoIGQ9Ik01NSA2MTUgQzE1NSA0NjAsMjQ1IDY1MCwzNTAgNDcwIFM1MjUgMzc1LDU5MCAxOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLXdpZHRoPSIxOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNzQiLz4KICAgICAgPHBhdGggZD0iTTgwIDY4MCBDMjA1IDU1NSwyNzAgNjUwLDM5MiA1NTUgUzU0NSA0NzAsNjEwIDMyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUExQjJFIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjI0Ii8+CiAgICAgIDxyZWN0IHg9IjI4IiB5PSIyOCIgd2lkdGg9IjU4NCIgaGVpZ2h0PSI3MDQiIHJ4PSIyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUExQjJFIiBzdHJva2Utb3BhY2l0eT0iLjEyIi8+CiAgICA8L3N2Zz4="}, {"name": "김민지", "food": "마라탕", "foodEmoji": "🌶️🍲", "residence": "서울과학기술대학교 (기숙사)", "work": "오디세이", "artist": "스파이에어", "sns": "ljrxmo", "color": "#DCE4C9", "foodTag": "malatang hotpot", "workTag": "the odyssey movie poster", "foodImage": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/malatang.jpg", "workImage": "https://dx35vtwkllhj9.cloudfront.net/universalstudios/the-odyssey/images/regions/ca/onesheet.jpg", "workImageLabel": "The Odyssey (2026)", "workSource": "https://www.universalpictures.com/movies/the-odyssey", "index": "02", "shortResidence": "서울과학기술대학교", "palette": {"bg": "#59BFCD", "accent": "#B55F4D", "text": "#18333B", "soft": "#AEE0E4"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjM0MSIgY3k9IjIxNyIgcj0iNjMiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjUxMSIgY3k9IjQ3MyIgcj0iMjQiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjIxNSIgY3k9IjQ1OSIgcj0iNTMiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjE0MyIgY3k9IjMyMSIgcj0iNjYiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjIwMyIgY3k9IjY1IiByPSI5MSIgZmlsbD0iI0ZGRDZDOSIgZmlsbC1vcGFjaXR5PSIwLjEzIi8+PGNpcmNsZSBjeD0iNDUzIiBjeT0iMzAxIiByPSI5NSIgZmlsbD0iI0ZGRDZDOSIgZmlsbC1vcGFjaXR5PSIwLjIzIi8+PGNpcmNsZSBjeD0iNDM5IiBjeT0iMTUxIiByPSI5MCIgZmlsbD0iI0ZGRDZDOSIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+CiAgICAgIDxyZWN0IHg9IjE3NSIgeT0iMTU3IiB3aWR0aD0iNDE5IiBoZWlnaHQ9IjE2MyIgcng9IjMyIiBmaWxsPSIjRkZENkM5IiBmaWxsLW9wYWNpdHk9Ii40MiIgdHJhbnNmb3JtPSJyb3RhdGUoNyAzODQuNSAyMzguNSkiLz4KICAgICAgPHBhdGggZD0iTTU1IDYxNSBDMTU1IDQ2MCwyNDUgNjUwLDM1MCA0NzAgUzUyNSAzNzUsNTkwIDE5MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZENkM5IiBzdHJva2Utd2lkdGg9IjE4IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii43NCIvPgogICAgICA8cGF0aCBkPSJNODAgNjgwIEMyMDUgNTU1LDI3MCA2NTAsMzkyIDU1NSBTNTQ1IDQ3MCw2MTAgMzI1IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkQ2QzkiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuMjQiLz4KICAgICAgPHJlY3QgeD0iMjgiIHk9IjI4IiB3aWR0aD0iNTg0IiBoZWlnaHQ9IjcwNCIgcng9IjI2IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkQ2QzkiIHN0cm9rZS1vcGFjaXR5PSIuMTIiLz4KICAgIDwvc3ZnPg=="}, {"name": "김수정", "food": "엄마밥", "foodEmoji": "🍚🏠", "residence": "하계동", "work": "스파이더맨", "artist": "마이 케미컬 로맨스", "sns": "tnwjd1229", "color": "#DCEEFF", "foodTag": "home cooked korean meal", "workTag": "spiderman movie poster", "foodImage": "https://semie.cooking/image/board/cooking/iz/vq/aoxekpwa/125170255glvp.jpg", "workImage": "https://image.tmdb.org/t/p/original/4xOhtzXGt0if74dTmS4qtizFelX.jpg", "workImageLabel": "Spider-Man (2002)", "workSource": "https://www.themoviedb.org/movie/557-spider-man", "index": "03", "shortResidence": "하계동", "palette": {"bg": "#7E9FCF", "accent": "#F4F0E8", "text": "#FFFFFF", "soft": "#AFC3E0"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9IjU0MyIgY3k9IjQwMSIgcj0iMTAxIiBmaWxsPSIjMUExQjJFIiBmaWxsLW9wYWNpdHk9IjAuMTMiLz48Y2lyY2xlIGN4PSI1MTciIGN5PSI4MyIgcj0iMTA0IiBmaWxsPSIjMUExQjJFIiBmaWxsLW9wYWNpdHk9IjAuMjMiLz48Y2lyY2xlIGN4PSI5NSIgY3k9IjExNiIgcj0iMjgiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjI3MSIgY3k9IjU3NSIgcj0iNDIiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjM4MyIgY3k9IjIyOSIgcj0iNjQiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjczIiBjeT0iNzMiIHI9IjU4IiBmaWxsPSIjMUExQjJFIiBmaWxsLW9wYWNpdHk9IjAuMjMiLz48Y2lyY2xlIGN4PSIxMDUiIGN5PSIxMDIiIHI9Ijc2IiBmaWxsPSIjMUExQjJFIiBmaWxsLW9wYWNpdHk9IjAuMzMiLz4KICAgICAgPHJlY3QgeD0iNjQiIHk9IjEzMyIgd2lkdGg9IjMwNiIgaGVpZ2h0PSIxMDQiIHJ4PSIzMiIgZmlsbD0iIzFBMUIyRSIgZmlsbC1vcGFjaXR5PSIuNDIiIHRyYW5zZm9ybT0icm90YXRlKC00IDIxNy4wIDE4NS4wKSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiMxQTFCMkUiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "김예진", "food": "쌈밥", "foodEmoji": "🥬🍚", "residence": "수원", "work": "오디세이", "artist": "지소쿠리클럽", "sns": "yezzzzzzzzzzzin", "color": "#E8D7D1", "foodTag": "ssambap korean food", "workTag": "the odyssey movie poster", "foodImage": "https://img1.daumcdn.net/thumb/R1280x0.fjpg/?fname=https%3A%2F%2Ft1.daumcdn.net%2Fbrunch%2Fservice%2Fuser%2F33n7%2Fimage%2FcyyPyzOiUh6v4hl2bmJFd7uyhjU.jpg", "workImage": "https://dx35vtwkllhj9.cloudfront.net/universalstudios/the-odyssey/images/regions/ca/onesheet.jpg", "workImageLabel": "The Odyssey (2026)", "workSource": "https://www.universalpictures.com/movies/the-odyssey", "index": "04", "shortResidence": "수원", "palette": {"bg": "#F6F0EC", "accent": "#7B9BCD", "text": "#5873A4", "soft": "#E6EAF2"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjI1OSIgY3k9IjIwMCIgcj0iNjgiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjEwMyIgY3k9IjE3MiIgcj0iMTA2IiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9IjAuMjMiLz48Y2lyY2xlIGN4PSIxMDUiIGN5PSIyOTciIHI9IjEwNCIgZmlsbD0iI0ZGRDZDOSIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+PGNpcmNsZSBjeD0iMzk3IiBjeT0iMzMyIiByPSI1NyIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjQzIi8+PGNpcmNsZSBjeD0iMTg3IiBjeT0iNTg2IiByPSI5NiIgZmlsbD0iI0ZGRDZDOSIgZmlsbC1vcGFjaXR5PSIwLjEzIi8+PGNpcmNsZSBjeD0iMTU5IiBjeT0iMjI5IiByPSI5NSIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjIzIi8+PGNpcmNsZSBjeD0iMjgxIiBjeT0iMzA5IiByPSI0MyIgZmlsbD0iI0ZGRDZDOSIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+CiAgICAgIDxyZWN0IHg9IjE0MCIgeT0iMjM0IiB3aWR0aD0iMTg0IiBoZWlnaHQ9IjE0MSIgcng9IjMyIiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9Ii40MiIgdHJhbnNmb3JtPSJyb3RhdGUoMSAyMzIuMCAzMDQuNSkiLz4KICAgICAgPHBhdGggZD0iTTU1IDYxNSBDMTU1IDQ2MCwyNDUgNjUwLDM1MCA0NzAgUzUyNSAzNzUsNTkwIDE5MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZENkM5IiBzdHJva2Utd2lkdGg9IjE4IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii43NCIvPgogICAgICA8cGF0aCBkPSJNODAgNjgwIEMyMDUgNTU1LDI3MCA2NTAsMzkyIDU1NSBTNTQ1IDQ3MCw2MTAgMzI1IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkQ2QzkiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuMjQiLz4KICAgICAgPHJlY3QgeD0iMjgiIHk9IjI4IiB3aWR0aD0iNTg0IiBoZWlnaHQ9IjcwNCIgcng9IjI2IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkQ2QzkiIHN0cm9rZS1vcGFjaXR5PSIuMTIiLz4KICAgIDwvc3ZnPg=="}, {"name": "김주은", "food": "연어초밥", "foodEmoji": "🍣", "residence": "연신내", "work": "옵세션", "artist": "실리카겔", "sns": "pinking.making", "color": "#CFE0D8", "foodTag": "salmon sushi", "workTag": "obsession series poster", "foodImage": "https://commons.wikimedia.org/wiki/Special:FilePath/Salmon%20Sushi%20and%20Sashimi%20Platter%20-%20W%20Sushi.jpg", "workImage": "https://image.tmdb.org/t/p/original/m9dPQfHSwjmLzZ7zI1x8fPAsSMe.jpg", "workImageLabel": "Obsession (2023)", "workSource": "https://www.netflix.com/title/81478642", "index": "05", "shortResidence": "연신내", "palette": {"bg": "#111A1F", "accent": "#F1A640", "text": "#F1A640", "soft": "#23323A"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9IjQyNSIgY3k9IjE3NiIgcj0iODMiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjIyNSIgY3k9IjI4MCIgcj0iNzQiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjY5IiBjeT0iNTM0IiByPSI0NCIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+PGNpcmNsZSBjeD0iMTcxIiBjeT0iMTg2IiByPSI2MyIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjQzIi8+PGNpcmNsZSBjeD0iMTYzIiBjeT0iMTY4IiByPSIxMDYiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjI2NSIgY3k9IjEwNiIgcj0iMzkiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjUxMyIgY3k9IjE0NSIgcj0iNjgiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPgogICAgICA8cmVjdCB4PSI4MCIgeT0iMTU0IiB3aWR0aD0iMzQ4IiBoZWlnaHQ9IjE3MSIgcng9IjMyIiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9Ii40MiIgdHJhbnNmb3JtPSJyb3RhdGUoLTE3IDI1NC4wIDIzOS41KSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiM2RDVCQTYiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "김채호", "food": "계란찜", "foodEmoji": "🥚", "residence": "하계", "work": "오디세이", "artist": "킹누", "sns": "k_chaeho", "color": "#DED8EA", "foodTag": "korean steamed egg", "workTag": "the odyssey movie poster", "foodImage": "https://storage.googleapis.com/onelife-public/blog.onelife.vn/2026/03/7bdeeb2e-trung-hap-kieu-han-quoc-5.jpg", "workImage": "https://dx35vtwkllhj9.cloudfront.net/universalstudios/the-odyssey/images/regions/ca/onesheet.jpg", "workImageLabel": "The Odyssey (2026)", "workSource": "https://www.universalpictures.com/movies/the-odyssey", "index": "06", "shortResidence": "하계", "palette": {"bg": "#F3AA45", "accent": "#111A1F", "text": "#111A1F", "soft": "#F7C778"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjE5MSIgY3k9IjM2MCIgcj0iNDAiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjM2NyIgY3k9IjMyOSIgcj0iMzkiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjIyMyIgY3k9IjU4MCIgcj0iMTAwIiBmaWxsPSIjNkQ1QkE2IiBmaWxsLW9wYWNpdHk9IjAuMzMiLz48Y2lyY2xlIGN4PSIyODciIGN5PSI0NTAiIHI9IjgyIiBmaWxsPSIjNkQ1QkE2IiBmaWxsLW9wYWNpdHk9IjAuNDMiLz48Y2lyY2xlIGN4PSIzNDMiIGN5PSI0NDgiIHI9IjEwNiIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIwLjEzIi8+PGNpcmNsZSBjeD0iMzEzIiBjeT0iMzk3IiByPSI4MyIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIwLjIzIi8+PGNpcmNsZSBjeD0iNTciIGN5PSIxODQiIHI9IjUxIiBmaWxsPSIjNkQ1QkE2IiBmaWxsLW9wYWNpdHk9IjAuMzMiLz4KICAgICAgPHJlY3QgeD0iOTIiIHk9IjE3MyIgd2lkdGg9IjM0OCIgaGVpZ2h0PSIyMTUiIHJ4PSIzMiIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIuNDIiIHRyYW5zZm9ybT0icm90YXRlKDExIDI2Ni4wIDI4MC41KSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiM2RDVCQTYiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "남미경", "food": "샌드위치", "foodEmoji": "🥪", "residence": "명일동", "work": "슬로우 호시스", "artist": "alice merton", "sns": "youanialways", "color": "#E5D8C8", "foodTag": "sandwich", "workTag": "slow horses poster", "foodImage": "https://commons.wikimedia.org/wiki/Special:FilePath/Sandwich%20food%20meal.jpg", "workImage": "https://image.tmdb.org/t/p/original/o9AKPz4TLsn9j6taGfFSEN6b2IE.jpg", "workImageLabel": "Slow Horses", "workSource": "https://www.themoviedb.org/tv/95480-slow-horses", "index": "07", "shortResidence": "명일동", "palette": {"bg": "#A97E58", "accent": "#DDC7A7", "text": "#E9D7BA", "soft": "#BD9875"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9IjQyMSIgY3k9IjE4NiIgcj0iMjkiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjU0NyIgY3k9IjI2MCIgcj0iMTA4IiBmaWxsPSIjMUExQjJFIiBmaWxsLW9wYWNpdHk9IjAuMjMiLz48Y2lyY2xlIGN4PSI0MTUiIGN5PSI0MjIiIHI9IjczIiBmaWxsPSIjMUExQjJFIiBmaWxsLW9wYWNpdHk9IjAuMzMiLz48Y2lyY2xlIGN4PSIxODMiIGN5PSI3NSIgcj0iOTUiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjE3MyIgY3k9IjQxMyIgcj0iOTMiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjI0NSIgY3k9IjM0MiIgcj0iNjYiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjQwMyIgY3k9IjM4NyIgcj0iNjAiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPgogICAgICA8cmVjdCB4PSI2NSIgeT0iMjcyIiB3aWR0aD0iMzM1IiBoZWlnaHQ9IjEzNCIgcng9IjMyIiBmaWxsPSIjMUExQjJFIiBmaWxsLW9wYWNpdHk9Ii40MiIgdHJhbnNmb3JtPSJyb3RhdGUoOSAyMzIuNSAzMzkuMCkiLz4KICAgICAgPHBhdGggZD0iTTU1IDYxNSBDMTU1IDQ2MCwyNDUgNjUwLDM1MCA0NzAgUzUyNSAzNzUsNTkwIDE5MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUExQjJFIiBzdHJva2Utd2lkdGg9IjE4IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii43NCIvPgogICAgICA8cGF0aCBkPSJNODAgNjgwIEMyMDUgNTU1LDI3MCA2NTAsMzkyIDU1NSBTNTQ1IDQ3MCw2MTAgMzI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMxQTFCMkUiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuMjQiLz4KICAgICAgPHJlY3QgeD0iMjgiIHk9IjI4IiB3aWR0aD0iNTg0IiBoZWlnaHQ9IjcwNCIgcng9IjI2IiBmaWxsPSJub25lIiBzdHJva2U9IiMxQTFCMkUiIHN0cm9rZS1vcGFjaXR5PSIuMTIiLz4KICAgIDwvc3ZnPg=="}, {"name": "박소영", "food": "치킨", "foodEmoji": "🍗", "residence": "서울과학기술대학교 (기숙사)", "work": "피아니스트", "artist": "빅뱅", "sns": "parksozero", "color": "#E8D9DF", "foodTag": "fried chicken", "workTag": "the pianist poster", "foodImage": "https://images.rawpixel.com/image_social_landscape/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTEyL3Jhd3BpeGVsX29mZmljZV80Ml9waG90b2dyYXBoX29mX2Ffa29yZWFuX2ZyaWVkX2NoaWNrZW5fZmxhdF9sYV85MjNhYTY2NS1hMjc0LTRlZDMtYmZhNi03OGM4MDBhNjQxMmVfMS5qcGc.jpg", "workImage": "https://www.impawards.com/2002/posters/pianist.jpg", "workImageLabel": "The Pianist (2002)", "workSource": "https://www.impawards.com/2002/pianist.html", "index": "08", "shortResidence": "서울과학기술대학교", "palette": {"bg": "#D5BA96", "accent": "#A77852", "text": "#8F6547", "soft": "#E2D0B6"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjEzMSIgY3k9IjM3NyIgcj0iMzQiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjMwNyIgY3k9IjM4MSIgcj0iNjQiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjU0NyIgY3k9IjIzMSIgcj0iODkiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjExOSIgY3k9IjI2MiIgcj0iODUiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjM1OSIgY3k9IjE0NyIgcj0iMjciIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjM2MyIgY3k9IjE5OCIgcj0iODEiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjIxNyIgY3k9IjM2NiIgcj0iMTAxIiBmaWxsPSIjNkQ1QkE2IiBmaWxsLW9wYWNpdHk9IjAuMzMiLz4KICAgICAgPHJlY3QgeD0iMTI1IiB5PSIyNjIiIHdpZHRoPSIzNTUiIGhlaWdodD0iMTI3IiByeD0iMzIiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iLjQyIiB0cmFuc2Zvcm09InJvdGF0ZSgtMjMgMzAyLjUgMzI1LjUpIi8+CiAgICAgIDxwYXRoIGQ9Ik01NSA2MTUgQzE1NSA0NjAsMjQ1IDY1MCwzNTAgNDcwIFM1MjUgMzc1LDU5MCAxOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzZENUJBNiIgc3Ryb2tlLXdpZHRoPSIxOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNzQiLz4KICAgICAgPHBhdGggZD0iTTgwIDY4MCBDMjA1IDU1NSwyNzAgNjUwLDM5MiA1NTUgUzU0NSA0NzAsNjEwIDMyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZENkM5IiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjI0Ii8+CiAgICAgIDxyZWN0IHg9IjI4IiB5PSIyOCIgd2lkdGg9IjU4NCIgaGVpZ2h0PSI3MDQiIHJ4PSIyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZENkM5IiBzdHJva2Utb3BhY2l0eT0iLjEyIi8+CiAgICA8L3N2Zz4="}, {"name": "원유미", "food": "샤브샤브", "foodEmoji": "🍲", "residence": "방배동", "work": "Spiderman", "artist": "Alvaro Soler", "sns": "nv.quynhu", "color": "#DDD6E1", "foodTag": "shabu shabu", "workTag": "spiderman movie poster", "foodImage": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/shabushabu.jpg", "workImage": "https://image.tmdb.org/t/p/original/4xOhtzXGt0if74dTmS4qtizFelX.jpg", "workImageLabel": "Spider-Man (2002)", "workSource": "https://www.themoviedb.org/movie/557-spider-man", "index": "09", "shortResidence": "방배동", "palette": {"bg": "#285D9E", "accent": "#B9BAB7", "text": "#D9CFBE", "soft": "#3A6EAE"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9IjUxMyIgY3k9IjQ3OSIgcj0iOTUiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjI4NyIgY3k9IjE2MSIgcj0iNzYiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjMyMyIgY3k9IjMyMyIgcj0iMzUiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjE2MSIgY3k9IjU2MyIgcj0iNDIiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjQ1OSIgY3k9IjM0OCIgcj0iNzMiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjE0OSIgY3k9IjQ0MCIgcj0iODkiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjMwNyIgY3k9IjI3OCIgcj0iMzAiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPgogICAgICA8cmVjdCB4PSIxMTMiIHk9IjIxOSIgd2lkdGg9IjIyOSIgaGVpZ2h0PSI3MSIgcng9IjMyIiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9Ii40MiIgdHJhbnNmb3JtPSJyb3RhdGUoMTIgMjI3LjUgMjU0LjUpIi8+CiAgICAgIDxwYXRoIGQ9Ik01NSA2MTUgQzE1NSA0NjAsMjQ1IDY1MCwzNTAgNDcwIFM1MjUgMzc1LDU5MCAxOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzZENUJBNiIgc3Ryb2tlLXdpZHRoPSIxOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNzQiLz4KICAgICAgPHBhdGggZD0iTTgwIDY4MCBDMjA1IDU1NSwyNzAgNjUwLDM5MiA1NTUgUzU0NSA0NzAsNjEwIDMyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUExQjJFIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjI0Ii8+CiAgICAgIDxyZWN0IHg9IjI4IiB5PSIyOCIgd2lkdGg9IjU4NCIgaGVpZ2h0PSI3MDQiIHJ4PSIyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUExQjJFIiBzdHJva2Utb3BhY2l0eT0iLjEyIi8+CiAgICA8L3N2Zz4="}, {"name": "임영현", "food": "미입력", "foodEmoji": "➖", "residence": "미입력", "work": "미입력", "artist": "미입력", "sns": "", "color": "#DDDDDA", "foodTag": "korean food", "workTag": "movie poster", "foodImage": "", "workImage": "", "workImageLabel": "미입력", "workSource": "", "index": "10", "shortResidence": "Location unknown", "palette": {"bg": "#AAA9A6", "accent": "#1E5D9E", "text": "#1E5D9E", "soft": "#C6C5C1"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjMxOSIgY3k9IjEzMyIgcj0iNDQiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjMwNSIgY3k9IjI1NiIgcj0iNzYiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjE0NyIgY3k9IjEwMiIgcj0iNzIiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjE2MyIgY3k9IjQ1OSIgcj0iNTgiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjEyMSIgY3k9IjM0OCIgcj0iNDkiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjI0MSIgY3k9IjUxNiIgcj0iMTAwIiBmaWxsPSIjRkZENkM5IiBmaWxsLW9wYWNpdHk9IjAuMjMiLz48Y2lyY2xlIGN4PSI5MSIgY3k9IjQ4NyIgcj0iMTAzIiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9IjAuMzMiLz4KICAgICAgPHJlY3QgeD0iMTUwIiB5PSIzMjEiIHdpZHRoPSIzNzciIGhlaWdodD0iODIiIHJ4PSIzMiIgZmlsbD0iI0ZGRDZDOSIgZmlsbC1vcGFjaXR5PSIuNDIiIHRyYW5zZm9ybT0icm90YXRlKDIyIDMzOC41IDM2Mi4wKSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiNGMDhBOEEiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "임훈정", "food": "삼겹살", "foodEmoji": "🥓", "residence": "중계동", "work": "오디세이", "artist": "jayb", "sns": "by_seohua", "color": "#D4E0E5", "foodTag": "samgyeopsal korean bbq", "workTag": "the odyssey movie poster", "foodImage": "https://cdn.r-corona.jp/prd.rb.r-corona.jp/assets/site_files/go317ocu/67728613/lbpq_w690h690.jpg", "workImage": "https://dx35vtwkllhj9.cloudfront.net/universalstudios/the-odyssey/images/regions/ca/onesheet.jpg", "workImageLabel": "The Odyssey (2026)", "workSource": "https://www.universalpictures.com/movies/the-odyssey", "index": "11", "shortResidence": "중계동", "palette": {"bg": "#67418A", "accent": "#CBD8DA", "text": "#DCE4E3", "soft": "#835EA0"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9Ijc5IiBjeT0iMTI2IiByPSI5NyIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIwLjEzIi8+PGNpcmNsZSBjeD0iNzkiIGN5PSI0MTYiIHI9IjEwMiIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjIzIi8+PGNpcmNsZSBjeD0iMzEzIiBjeT0iMzkzIiByPSIxMDciIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjQ5MSIgY3k9IjIxNSIgcj0iMzMiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjExNSIgY3k9IjU3OCIgcj0iODIiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjM5NyIgY3k9IjU4OCIgcj0iMzIiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjM3NSIgY3k9IjgzIiByPSI3NSIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+CiAgICAgIDxyZWN0IHg9IjE4NSIgeT0iMTI0IiB3aWR0aD0iMjM4IiBoZWlnaHQ9Ijc4IiByeD0iMzIiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iLjQyIiB0cmFuc2Zvcm09InJvdGF0ZSg3IDMwNC4wIDE2My4wKSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiM2RDVCQTYiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "채영미", "food": "통닭", "foodEmoji": "🍗", "residence": "동두천", "work": "들쥐", "artist": "드렁큰타이거", "sns": "artbadwoman", "color": "#E1DDC8", "foodTag": "whole fried chicken", "workTag": "mouse movie poster", "foodImage": "https://cdn.imweb.me/thumbnail/20230925/75ea34d5f34c5.jpg", "workImage": "https://www.esquirekorea.co.kr/resources/online/online_image/2026/08/27/f7d3e8fb-bd5d-4c09-ab79-b7e8430ace85.jpg", "workImageLabel": "들쥐 (2026)", "workSource": "https://about.netflix.com/ko/news/mousetrap-premieres-august-28", "index": "12", "shortResidence": "동두천", "palette": {"bg": "#CBD8DA", "accent": "#68418A", "text": "#68418A", "soft": "#E2E9EA"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjI3NyIgY3k9IjU0OSIgcj0iOTciIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjM0OSIgY3k9IjQyNCIgcj0iNDIiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjExMyIgY3k9IjQxMSIgcj0iODUiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjM3NyIgY3k9IjIxNSIgcj0iODAiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjUyNyIgY3k9IjEwMiIgcj0iMTAzIiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9IjAuMTMiLz48Y2lyY2xlIGN4PSI0MDUiIGN5PSI1NDMiIHI9IjkyIiBmaWxsPSIjRkZENkM5IiBmaWxsLW9wYWNpdHk9IjAuMjMiLz48Y2lyY2xlIGN4PSIzOTMiIGN5PSI1MzIiIHI9IjU3IiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9IjAuMzMiLz4KICAgICAgPHJlY3QgeD0iMTYzIiB5PSIxMjMiIHdpZHRoPSIxOTEiIGhlaWdodD0iMTYwIiByeD0iMzIiIGZpbGw9IiNGRkQ2QzkiIGZpbGwtb3BhY2l0eT0iLjQyIiB0cmFuc2Zvcm09InJvdGF0ZSg1IDI1OC41IDIwMy4wKSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiNGMDhBOEEiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "최동욱", "food": "초밥", "foodEmoji": "🍣", "residence": "하계", "work": "오디세이", "artist": "한로로", "sns": "ch_dongwook", "color": "#D6E0DB", "foodTag": "sushi", "workTag": "the odyssey movie poster", "foodImage": "https://cdn.prod.website-files.com/665c532cc9944a621d8ee5ae/6849763e8fe531f8c9f46735_66785062517758af7bb5b03d_1_familie_pakke_62_biter.jpeg", "workImage": "https://dx35vtwkllhj9.cloudfront.net/universalstudios/the-odyssey/images/regions/ca/onesheet.jpg", "workImageLabel": "The Odyssey (2026)", "workSource": "https://www.universalpictures.com/movies/the-odyssey", "index": "13", "shortResidence": "하계", "palette": {"bg": "#B96A55", "accent": "#62C4CE", "text": "#F9EFE7", "soft": "#D58D78"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9IjEzNSIgY3k9IjIzMSIgcj0iOTciIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjU1MSIgY3k9IjE5NCIgcj0iNTMiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjM2MyIgY3k9Ijc5IiByPSI0MSIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+PGNpcmNsZSBjeD0iNDM5IiBjeT0iNTY3IiByPSI1MyIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIwLjQzIi8+PGNpcmNsZSBjeD0iMjE3IiBjeT0iMTI0IiByPSI3MCIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjEzIi8+PGNpcmNsZSBjeD0iMTgxIiBjeT0iNDUyIiByPSI5NCIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIwLjIzIi8+PGNpcmNsZSBjeD0iNjkiIGN5PSIxMjQiIHI9Ijk3IiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9IjAuMzMiLz4KICAgICAgPHJlY3QgeD0iMTE5IiB5PSIxNDQiIHdpZHRoPSIzMTIiIGhlaWdodD0iNzYiIHJ4PSIzMiIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIuNDIiIHRyYW5zZm9ybT0icm90YXRlKC0xNyAyNzUuMCAxODIuMCkiLz4KICAgICAgPHBhdGggZD0iTTU1IDYxNSBDMTU1IDQ2MCwyNDUgNjUwLDM1MCA0NzAgUzUyNSAzNzUsNTkwIDE5MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjA4QThBIiBzdHJva2Utd2lkdGg9IjE4IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii43NCIvPgogICAgICA8cGF0aCBkPSJNODAgNjgwIEMyMDUgNTU1LDI3MCA2NTAsMzkyIDU1NSBTNTQ1IDQ3MCw2MTAgMzI1IiBmaWxsPSJub25lIiBzdHJva2U9IiMxQTFCMkUiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuMjQiLz4KICAgICAgPHJlY3QgeD0iMjgiIHk9IjI4IiB3aWR0aD0iNTg0IiBoZWlnaHQ9IjcwNCIgcng9IjI2IiBmaWxsPSJub25lIiBzdHJva2U9IiMxQTFCMkUiIHN0cm9rZS1vcGFjaXR5PSIuMTIiLz4KICAgIDwvc3ZnPg=="}, {"name": "카밀라", "food": "치즈 가리비", "foodEmoji": "🧀🐚", "residence": "석계", "work": "들쥐", "artist": "한로로", "sns": "camisald", "color": "#E0D3D5", "foodTag": "cheese scallops", "workTag": "mouse movie poster", "foodImage": "https://www-x-myovenplus-x-com.img.addlink.cn/static/upload/image/20230211/1676104425391349.jpg", "workImage": "https://www.esquirekorea.co.kr/resources/online/online_image/2026/08/27/f7d3e8fb-bd5d-4c09-ab79-b7e8430ace85.jpg", "workImageLabel": "들쥐 (2026)", "workSource": "https://about.netflix.com/ko/news/mousetrap-premieres-august-28", "index": "14", "shortResidence": "석계", "palette": {"bg": "#59BFCD", "accent": "#B55F4D", "text": "#18333B", "soft": "#AEE0E4"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjQxNyIgY3k9IjE4NiIgcj0iMzYiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjQ5NSIgY3k9IjM4MSIgcj0iNTgiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjI2MyIgY3k9IjEwNCIgcj0iNDIiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjQwMyIgY3k9IjQ0MiIgcj0iOTgiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjE3MyIgY3k9IjQ4NyIgcj0iNjMiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjM2MyIgY3k9IjQ1NCIgcj0iNzQiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjkzIiBjeT0iNTY5IiByPSIzMCIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+CiAgICAgIDxyZWN0IHg9IjEyMCIgeT0iMTQxIiB3aWR0aD0iMjE5IiBoZWlnaHQ9IjE0MiIgcng9IjMyIiBmaWxsPSIjNkQ1QkE2IiBmaWxsLW9wYWNpdHk9Ii40MiIgdHJhbnNmb3JtPSJyb3RhdGUoLTE4IDIyOS41IDIxMi4wKSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiNGMDhBOEEiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "한다빈", "food": "뇨끼", "foodEmoji": "🥔🍝", "residence": "공릉", "work": "릴로와 스티치", "artist": "Laufey", "sns": "dabinciii", "color": "#D5E2CD", "foodTag": "gnocchi", "workTag": "lilo and stitch poster", "foodImage": "https://www.kingarthurbaking.com/sites/default/files/2025-02/Potato-Gnocchi_2025_Lifestyle_ALT_H_045.jpg", "workImage": "https://www.youloveit.com/uploads/posts/2025-03/1742463147_youloveit_com_lilo_and_stitch_movie_2025_disney_princess_inspired_posters2.webp", "workImageLabel": "Lilo & Stitch (2025)", "workSource": "https://movies.disney.com/lilo-and-stitch-2025", "index": "15", "shortResidence": "공릉", "palette": {"bg": "#7E9FCF", "accent": "#F4F0E8", "text": "#FFFFFF", "soft": "#AFC3E0"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9IjE5NyIgY3k9IjQxMyIgcj0iMzkiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjEzMyIgY3k9IjIzMyIgcj0iNzMiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjE3MSIgY3k9Ijk4IiByPSI5MSIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+PGNpcmNsZSBjeD0iMjE1IiBjeT0iNDQ4IiByPSIyOSIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjQzIi8+PGNpcmNsZSBjeD0iMzk1IiBjeT0iMzQyIiByPSIyOCIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjEzIi8+PGNpcmNsZSBjeD0iMjE5IiBjeT0iMjAyIiByPSI4MCIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjIzIi8+PGNpcmNsZSBjeD0iODciIGN5PSI0MjgiIHI9Ijk3IiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9IjAuMzMiLz4KICAgICAgPHJlY3QgeD0iMTI3IiB5PSIyOTIiIHdpZHRoPSIyNzAiIGhlaWdodD0iMTI2IiByeD0iMzIiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iLjQyIiB0cmFuc2Zvcm09InJvdGF0ZSgtMTUgMjYyLjAgMzU1LjApIi8+CiAgICAgIDxwYXRoIGQ9Ik01NSA2MTUgQzE1NSA0NjAsMjQ1IDY1MCwzNTAgNDcwIFM1MjUgMzc1LDU5MCAxOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0YwOEE4QSIgc3Ryb2tlLXdpZHRoPSIxOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNzQiLz4KICAgICAgPHBhdGggZD0iTTgwIDY4MCBDMjA1IDU1NSwyNzAgNjUwLDM5MiA1NTUgUzU0NSA0NzAsNjEwIDMyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUExQjJFIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjI0Ii8+CiAgICAgIDxyZWN0IHg9IjI4IiB5PSIyOCIgd2lkdGg9IjU4NCIgaGVpZ2h0PSI3MDQiIHJ4PSIyNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUExQjJFIiBzdHJva2Utb3BhY2l0eT0iLjEyIi8+CiAgICA8L3N2Zz4="}, {"name": "호프슈타트 파울", "food": "피자", "foodEmoji": "🍕", "residence": "공릉", "work": "라스트 에어 벤더", "artist": "잔나비", "sns": "dtc_ph", "color": "#DDD8C9", "foodTag": "pizza", "workTag": "avatar the last airbender poster", "foodImage": "https://media-assets.swiggy.com/swiggy/image/upload/f_auto%2Cq_auto%2Cfl_lossy/RX_THUMBNAIL/IMAGES/VENDOR/2025/3/12/1b5d8c35-0d4b-4eab-9d59-4e2c65ca9d7d_129933%20%281%29.jpg", "workImage": "https://image.tmdb.org/t/p/original/dHVBAhJ7jfD4S16ZEJmZbjotAD0.jpg", "workImageLabel": "Avatar: The Last Airbender (2024)", "workSource": "https://www.themoviedb.org/tv/82452-avatar-the-last-airbender", "index": "16", "shortResidence": "공릉", "palette": {"bg": "#F6F0EC", "accent": "#7B9BCD", "text": "#5873A4", "soft": "#E6EAF2"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjMxOSIgY3k9IjQ4MyIgcj0iOTQiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjM5NSIgY3k9IjE2MSIgcj0iODMiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjE0MSIgY3k9IjI3NiIgcj0iNTUiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjQxMyIgY3k9IjU2MSIgcj0iOTkiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9IjQ2MyIgY3k9IjUzOSIgcj0iOTIiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjE0OSIgY3k9IjQ4MSIgcj0iNjciIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjI2MSIgY3k9IjM5NSIgcj0iNjQiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPgogICAgICA8cmVjdCB4PSIxMzMiIHk9IjI3NiIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxMzUiIHJ4PSIzMiIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIuNDIiIHRyYW5zZm9ybT0icm90YXRlKDE5IDIyMy4wIDM0My41KSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiNGMDhBOEEiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDZDOSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "홍정욱", "food": "햄버거", "foodEmoji": "🍔", "residence": "전농동", "work": "파라노만", "artist": "백예린", "sns": "hongstl_studio", "color": "#D2DCEA", "foodTag": "hamburger", "workTag": "paranorman poster", "foodImage": "https://commons.wikimedia.org/wiki/Special:FilePath/NCI%20Visuals%20Food%20Hamburger.jpg", "workImage": "https://image.tmdb.org/t/p/original/yDbJ3Ui5jrCjDqI3bJfccjJU3fm.jpg", "workImageLabel": "ParaNorman (2012)", "workSource": "https://www.themoviedb.org/movie/77174-paranorman", "index": "17", "shortResidence": "전농동", "palette": {"bg": "#111A1F", "accent": "#F1A640", "text": "#F1A640", "soft": "#23323A"}, "scheme": {"main_bg": "#1A1B2E", "main_text": "#FFF7F1", "muted": "#D7CFD1", "button_bg": "#F08A8A", "button_text": "#1A1B2E", "side_bg": "#FFD6C9", "strip": "#F08A8A"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjRkZENkM5Ii8+CiAgICAgIDxjaXJjbGUgY3g9IjQ5NSIgY3k9IjEwNCIgcj0iNzUiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjE1MyIgY3k9IjE3OCIgcj0iMjQiIGZpbGw9IiM2RDVCQTYiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjUxNyIgY3k9Ijc1IiByPSI5OSIgZmlsbD0iIzFBMUIyRSIgZmlsbC1vcGFjaXR5PSIwLjMzIi8+PGNpcmNsZSBjeD0iMzQxIiBjeT0iMzQ2IiByPSI5OSIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIwLjQzIi8+PGNpcmNsZSBjeD0iOTMiIGN5PSI0MTgiIHI9IjYzIiBmaWxsPSIjMUExQjJFIiBmaWxsLW9wYWNpdHk9IjAuMTMiLz48Y2lyY2xlIGN4PSIxNjUiIGN5PSIyMTkiIHI9Ijg3IiBmaWxsPSIjNkQ1QkE2IiBmaWxsLW9wYWNpdHk9IjAuMjMiLz48Y2lyY2xlIGN4PSI2NSIgY3k9IjU3MSIgcj0iNjQiIGZpbGw9IiMxQTFCMkUiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPgogICAgICA8cmVjdCB4PSIxMzUiIHk9IjE0MiIgd2lkdGg9IjMwNSIgaGVpZ2h0PSIyMTkiIHJ4PSIzMiIgZmlsbD0iIzZENUJBNiIgZmlsbC1vcGFjaXR5PSIuNDIiIHRyYW5zZm9ybT0icm90YXRlKDExIDI4Ny41IDI1MS41KSIvPgogICAgICA8cGF0aCBkPSJNNTUgNjE1IEMxNTUgNDYwLDI0NSA2NTAsMzUwIDQ3MCBTNTI1IDM3NSw1OTAgMTkwIiBmaWxsPSJub25lIiBzdHJva2U9IiMxQTFCMkUiIHN0cm9rZS13aWR0aD0iMTgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjc0Ii8+CiAgICAgIDxwYXRoIGQ9Ik04MCA2ODAgQzIwNSA1NTUsMjcwIDY1MCwzOTIgNTU1IFM1NDUgNDcwLDYxMCAzMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii4yNCIvPgogICAgICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI1ODQiIGhlaWdodD0iNzA0IiByeD0iMjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzFBMUIyRSIgc3Ryb2tlLW9wYWNpdHk9Ii4xMiIvPgogICAgPC9zdmc+"}, {"name": "이서진", "food": "연어덮밥", "foodEmoji": "🍣🍚", "residence": "하계", "work": "치이카와", "artist": "나토리", "sns": "2_seo__jin", "color": "#E9DECE", "foodTag": "salmon rice bowl", "workTag": "chiikawa poster", "foodImage": "https://commons.wikimedia.org/wiki/Special:FilePath/Salmon%20don%20of%20Nakau.jpg", "workImage": "https://chiikawa.toho-movie.jp/assets/img2/home/sp_mv1.webp", "workImageLabel": "영화 치이카와: 인어의 섬의 비밀 (2026)", "workSource": "https://chiikawa.toho-movie.jp/", "index": "18", "shortResidence": "하계", "palette": {"bg": "#F3AA45", "accent": "#111A1F", "text": "#111A1F", "soft": "#F7C778"}, "scheme": {"main_bg": "#FFD6C9", "main_text": "#1A1B2E", "muted": "#42426F", "button_bg": "#1A1B2E", "button_text": "#FFD6C9", "side_bg": "#42426F", "strip": "#1A1B2E"}, "nameVisual": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiB2aWV3Qm94PSIwIDAgNjQwIDc2MCI+CiAgICAgIDxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNzYwIiBmaWxsPSIjNDI0MjZGIi8+CiAgICAgIDxjaXJjbGUgY3g9IjQxMSIgY3k9IjExMCIgcj0iNDkiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4xMyIvPjxjaXJjbGUgY3g9IjUzMSIgY3k9IjUxMCIgcj0iNTgiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjQ4NSIgY3k9IjM2NCIgcj0iNzMiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4zMyIvPjxjaXJjbGUgY3g9IjM1MyIgY3k9IjI5MyIgcj0iNjYiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC40MyIvPjxjaXJjbGUgY3g9Ijk5IiBjeT0iMzExIiByPSI2OSIgZmlsbD0iI0YwOEE4QSIgZmlsbC1vcGFjaXR5PSIwLjEzIi8+PGNpcmNsZSBjeD0iNDg5IiBjeT0iMTY1IiByPSIxMDAiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iMC4yMyIvPjxjaXJjbGUgY3g9IjM0NyIgY3k9IjUwNCIgcj0iMTAxIiBmaWxsPSIjRjA4QThBIiBmaWxsLW9wYWNpdHk9IjAuMzMiLz4KICAgICAgPHJlY3QgeD0iMTA5IiB5PSIzMjkiIHdpZHRoPSIzOTciIGhlaWdodD0iMTQ2IiByeD0iMzIiIGZpbGw9IiNGMDhBOEEiIGZpbGwtb3BhY2l0eT0iLjQyIiB0cmFuc2Zvcm09InJvdGF0ZSgtNSAzMDcuNSA0MDIuMCkiLz4KICAgICAgPHBhdGggZD0iTTU1IDYxNSBDMTU1IDQ2MCwyNDUgNjUwLDM1MCA0NzAgUzUyNSAzNzUsNTkwIDE5MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjA4QThBIiBzdHJva2Utd2lkdGg9IjE4IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii43NCIvPgogICAgICA8cGF0aCBkPSJNODAgNjgwIEMyMDUgNTU1LDI3MCA2NTAsMzkyIDU1NSBTNTQ1IDQ3MCw2MTAgMzI1IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkQ2QzkiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuMjQiLz4KICAgICAgPHJlY3QgeD0iMjgiIHk9IjI4IiB3aWR0aD0iNTg0IiBoZWlnaHQ9IjcwNCIgcng9IjI2IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkQ2QzkiIHN0cm9rZS1vcGFjaXR5PSIuMTIiLz4KICAgIDwvc3ZnPg=="}];
+    const locations = [{"label": "평촌", "lat": 37.3943, "lng": 126.9568, "members": ["이병학"]}, {"label": "서울과학기술대학교 (기숙사)", "lat": 37.6317, "lng": 127.0775, "members": ["김민지", "박소영"]}, {"label": "하계·하계동", "lat": 37.636, "lng": 127.069, "members": ["김수정", "김채호", "최동욱", "이서진"]}, {"label": "수원", "lat": 37.2636, "lng": 127.0286, "members": ["김예진"]}, {"label": "연신내", "lat": 37.619, "lng": 126.921, "members": ["김주은"]}, {"label": "명일동", "lat": 37.551, "lng": 127.144, "members": ["남미경"]}, {"label": "방배동", "lat": 37.481, "lng": 126.997, "members": ["원유미"]}, {"label": "중계동", "lat": 37.65, "lng": 127.077, "members": ["임훈정"]}, {"label": "동두천", "lat": 37.9034, "lng": 127.0605, "members": ["채영미"]}, {"label": "석계", "lat": 37.6148, "lng": 127.0656, "members": ["카밀라"]}, {"label": "공릉", "lat": 37.6258, "lng": 127.0739, "members": ["한다빈", "호프슈타트 파울"]}, {"label": "전농동", "lat": 37.5797, "lng": 127.0547, "members": ["홍정욱"]}];
+    const foodItems = [{"food": "텐동", "emoji": "🍤", "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Tendon%20%28Tempura%20over%20rice%29%20%40Daikoku-Ya%2C%20Asakusa%2C%20Tokyo%20%286639224619%29.jpg", "restaurant": {"name": "텐동 요츠야", "rating": "4.3", "address": "서울 관악구 관악로14길 71"}, "pickedBy": ["이병학"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%A4%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "마라탕", "emoji": "🌶️🍲", "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/malatang.jpg", "restaurant": {"name": "타오마라탕", "rating": "4.6", "address": "서울 마포구 양화로6길 19"}, "pickedBy": ["김민지"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8C%B6%EF%B8%8F%F0%9F%8D%B2%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "엄마밥", "emoji": "🍚🏠", "image": "https://semie.cooking/image/board/cooking/iz/vq/aoxekpwa/125170255glvp.jpg", "restaurant": {"name": "집밥김선생한식", "rating": "4.9", "address": "서울 용산구 이태원동 34-19"}, "pickedBy": ["김수정"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%9A%F0%9F%8F%A0%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "쌈밥", "emoji": "🥬🍚", "image": "https://img1.daumcdn.net/thumb/R1280x0.fjpg/?fname=https%3A%2F%2Ft1.daumcdn.net%2Fbrunch%2Fservice%2Fuser%2F33n7%2Fimage%2FcyyPyzOiUh6v4hl2bmJFd7uyhjU.jpg", "restaurant": {"name": "무한쌈밥", "rating": "4.3", "address": "서울 서초구 잠원동 36-27"}, "pickedBy": ["김예진"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%A5%AC%F0%9F%8D%9A%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "연어초밥", "emoji": "🍣", "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Salmon%20Sushi%20and%20Sashimi%20Platter%20-%20W%20Sushi.jpg", "restaurant": {"name": "연어초밥", "rating": "4.7", "address": "서울 서대문구 이화여대1길 42-1"}, "pickedBy": ["김주은"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%A3%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "계란찜", "emoji": "🥚", "image": "https://storage.googleapis.com/onelife-public/blog.onelife.vn/2026/03/7bdeeb2e-trung-hap-kieu-han-quoc-5.jpg", "restaurant": {"name": "육지 홍대점", "rating": "4.9", "address": "서울 마포구 독막로3길 34"}, "pickedBy": ["김채호"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%A5%9A%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "샌드위치", "emoji": "🥪", "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Sandwich%20food%20meal.jpg", "restaurant": {"name": "산도스 성수", "rating": "4.9", "address": "서울 성동구 서울숲2길 6"}, "pickedBy": ["남미경"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%A5%AA%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "치킨", "emoji": "🍗", "image": "https://images.rawpixel.com/image_social_landscape/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTEyL3Jhd3BpeGVsX29mZmljZV80Ml9waG90b2dyYXBoX29mX2Ffa29yZWFuX2ZyaWVkX2NoaWNrZW5fZmxhdF9sYV85MjNhYTY2NS1hMjc0LTRlZDMtYmZhNi03OGM4MDBhNjQxMmVfMS5qcGc.jpg", "restaurant": {"name": "BHC 서울시청점", "rating": "4.9", "address": "서울 중구 남대문로1길 14-1"}, "pickedBy": ["박소영"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%97%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "샤브샤브", "emoji": "🍲", "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/shabushabu.jpg", "restaurant": {"name": "등촌샤브칼국수 명동점", "rating": "4.8", "address": "서울 중구 명동길 56"}, "pickedBy": ["원유미"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%B2%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "삼겹살", "emoji": "🥓", "image": "https://cdn.r-corona.jp/prd.rb.r-corona.jp/assets/site_files/go317ocu/67728613/lbpq_w690h690.jpg", "restaurant": {"name": "솥고집 명동점", "rating": "4.7", "address": "서울 중구 명동길 55"}, "pickedBy": ["임훈정"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%A5%93%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "통닭", "emoji": "🍗", "image": "https://cdn.imweb.me/thumbnail/20230925/75ea34d5f34c5.jpg", "restaurant": {"name": "대왕통닭 명동", "rating": "4.8", "address": "서울 중구 충무로2가 12-13"}, "pickedBy": ["채영미"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%97%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "초밥", "emoji": "🍣", "image": "https://cdn.prod.website-files.com/665c532cc9944a621d8ee5ae/6849763e8fe531f8c9f46735_66785062517758af7bb5b03d_1_familie_pakke_62_biter.jpeg", "restaurant": {"name": "초밥집", "rating": "4.3", "address": "서울 서초구 방배본동 760-2"}, "pickedBy": ["최동욱"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%A3%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "치즈 가리비", "emoji": "🧀🐚", "image": "https://www-x-myovenplus-x-com.img.addlink.cn/static/upload/image/20230211/1676104425391349.jpg", "restaurant": {"name": "하와이조개", "rating": "4.9", "address": "서울 마포구 와우산로21길 19-8"}, "pickedBy": ["카밀라"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%A7%80%F0%9F%90%9A%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "뇨끼", "emoji": "🥔🍝", "image": "https://www.kingarthurbaking.com/sites/default/files/2025-02/Potato-Gnocchi_2025_Lifestyle_ALT_H_045.jpg", "restaurant": {"name": "뇨끼룸", "rating": "4.9", "address": "서울 성동구 성수일로1길 8"}, "pickedBy": ["한다빈"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%A5%94%F0%9F%8D%9D%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "피자", "emoji": "🍕", "image": "https://media-assets.swiggy.com/swiggy/image/upload/f_auto%2Cq_auto%2Cfl_lossy/RX_THUMBNAIL/IMAGES/VENDOR/2025/3/12/1b5d8c35-0d4b-4eab-9d59-4e2c65ca9d7d_129933%20%281%29.jpg", "restaurant": {"name": "핏제리아오 명동점", "rating": "4.9", "address": "서울 중구 남대문로 64-1"}, "pickedBy": ["호프슈타트 파울"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%95%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "햄버거", "emoji": "🍔", "image": "https://commons.wikimedia.org/wiki/Special:FilePath/NCI%20Visuals%20Food%20Hamburger.jpg", "restaurant": {"name": "멜팅소울 롯데백화점본점", "rating": "4.7", "address": "서울 중구 남대문로 81"}, "pickedBy": ["홍정욱"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%94%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"food": "연어덮밥", "emoji": "🍣🍚", "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Salmon%20don%20of%20Nakau.jpg", "restaurant": {"name": "동차밥", "rating": "4.5", "address": "서울 마포구 연희로1길 57"}, "pickedBy": ["이서진"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22520%22%20viewBox%3D%220%200%20700%20520%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22520%22%20fill%3D%22%23FFD6C9%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22575%22%20cy%3D%22110%22%20r%3D%22100%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.46%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22420%22%20r%3D%22150%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.20%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22630%22%20height%3D%22450%22%20rx%3D%2222%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%231A1B2E%22%20stroke-opacity%3D%22.12%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2260%22%20y%3D%22230%22%20font-size%3D%22120%22%20font-family%3D%22Arial%2CApple%20Color%20Emoji%2CSegoe%20UI%20Emoji%22%3E%F0%9F%8D%A3%F0%9F%8D%9A%3C/text%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M55%20385%20C170%20265%2C260%20475%2C390%20310%20S560%20280%2C650%20160%22%0A%20%20%20%20%20%20%20%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}];
+    const recentItems = [{"key": "슈퍼뒤에서 담배피우는 두사람", "display": "슈퍼 뒤에서 담배 피우는 두 사람", "year": "2026", "rt": "N/A", "poster": "https://www.oricon-group.com/upimg/detail/7000/7483/img660/Smoking-Behind-the-Supermarket-with-You.jpg", "pickedBy": ["이병학"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFFDFC%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFFDFC%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3E%EC%8A%88%ED%8D%BC%20%EB%92%A4%EC%97%90%EC%84%9C%20%EB%8B%B4%EB%B0%B0%20%ED%94%BC%EC%9A%B0%EB%8A%94%20%EB%91%90%20%EC%82%AC%EB%9E%8C%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2026%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "오디세이", "display": "The Odyssey", "year": "2026", "rt": "94%", "poster": "https://dx35vtwkllhj9.cloudfront.net/universalstudios/the-odyssey/images/regions/ca/onesheet.jpg", "pickedBy": ["김민지", "김예진", "김채호", "임훈정", "최동욱"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3EThe%20Odyssey%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2026%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "스파이더맨", "display": "Spider-Man", "year": "2002", "rt": "90%", "poster": "https://image.tmdb.org/t/p/original/4xOhtzXGt0if74dTmS4qtizFelX.jpg", "pickedBy": ["김수정", "원유미"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFFDFC%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFFDFC%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3ESpider-Man%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2002%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "옵세션", "display": "Obsession", "year": "2023", "rt": "25%", "poster": "https://image.tmdb.org/t/p/original/m9dPQfHSwjmLzZ7zI1x8fPAsSMe.jpg", "pickedBy": ["김주은"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3EObsession%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2023%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "슬로우 호시스", "display": "Slow Horses", "year": "2022–", "rt": "98% AVG", "poster": "https://image.tmdb.org/t/p/original/o9AKPz4TLsn9j6taGfFSEN6b2IE.jpg", "pickedBy": ["남미경"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFFDFC%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFFDFC%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3ESlow%20Horses%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2022%E2%80%93%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "피아니스트", "display": "The Pianist", "year": "2002", "rt": "95%", "poster": "https://www.impawards.com/2002/posters/pianist.jpg", "pickedBy": ["박소영"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3EThe%20Pianist%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2002%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "들쥐", "display": "들쥐", "year": "2026", "rt": "N/A", "poster": "https://www.esquirekorea.co.kr/resources/online/online_image/2026/08/27/f7d3e8fb-bd5d-4c09-ab79-b7e8430ace85.jpg", "pickedBy": ["채영미", "카밀라"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFFDFC%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFFDFC%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3E%EB%93%A4%EC%A5%90%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2026%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "릴로와 스티치", "display": "Lilo & Stitch", "year": "2025", "rt": "72%", "poster": "https://www.youloveit.com/uploads/posts/2025-03/1742463147_youloveit_com_lilo_and_stitch_movie_2025_disney_princess_inspired_posters2.webp", "pickedBy": ["한다빈"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3ELilo%20%26amp%3B%20Stitch%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2025%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "라스트 에어 벤더", "display": "Avatar: The Last Airbender", "year": "2024–", "rt": "66% AVG", "poster": "https://image.tmdb.org/t/p/original/dHVBAhJ7jfD4S16ZEJmZbjotAD0.jpg", "pickedBy": ["호프슈타트 파울"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFFDFC%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFFDFC%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3EAvatar%3A%20The%20Last%20Airbe%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2024%E2%80%93%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "파라노만", "display": "ParaNorman", "year": "2012", "rt": "89%", "poster": "https://image.tmdb.org/t/p/original/yDbJ3Ui5jrCjDqI3bJfccjJU3fm.jpg", "pickedBy": ["홍정욱"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFD6C9%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3EParaNorman%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2012%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFD6C9%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "치이카와", "display": "Chiikawa", "year": "2022–", "rt": "N/A", "poster": "https://chiikawa.toho-movie.jp/assets/img2/home/sp_mv1.webp", "pickedBy": ["이서진"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22600%22%20height%3D%22900%22%20viewBox%3D%220%200%20600%20900%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22600%22%20height%3D%22900%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2235%22%20y%3D%2235%22%20width%3D%22530%22%20height%3D%22830%22%20fill%3D%22none%22%20stroke%3D%22%23FFFDFC%22%20stroke-opacity%3D%22.17%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22490%22%20cy%3D%22135%22%20r%3D%2272%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.86%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20655%20L530%20325%22%20stroke%3D%22%23FFD6C9%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M70%20720%20L530%20390%22%20stroke%3D%22%23FFFDFC%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.35%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22112%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2221%22%20letter-spacing%3D%226%22%3EJS%20CINEMA%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22540%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22800%22%3EChiikawa%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2220%22%20letter-spacing%3D%225%22%3E2022%E2%80%93%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22820%22%20fill%3D%22%23FFFDFC%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2218%22%20letter-spacing%3D%224%22%3ERECENT%20SELECTION%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}];
+    const musicItems = [{"key": "스피츠", "display": "SPITZ", "spotify": "https://open.spotify.com/artist/5kjGRHClVacSyllOUqU1S0", "tracks": ["チェリー", "ロビンソン", "空も飛べるはず"], "pickedBy": ["이병학"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3ESPITZ%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "스파이에어", "display": "SPYAIR", "spotify": "https://open.spotify.com/artist/7gRg6C2qgQ1F01k3sgyEVt", "tracks": ["オレンジ", "サムライハート (Some Like It Hot!!)", "イマジネーション"], "pickedBy": ["김민지"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3ESPYAIR%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "마이 케미컬 로맨스", "display": "My Chemical Romance", "spotify": "https://open.spotify.com/artist/7FBcuc1gsnv6Y1nwFtNRCb", "tracks": ["Teenagers", "Welcome to the Black Parade", "Helena"], "pickedBy": ["김수정"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EMy%20Chemical%20Romanc%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "지소쿠리클럽", "display": "jisokuryClub", "spotify": "https://open.spotify.com/artist/4CIo3JKWdZi41ZKLlSjlyO", "tracks": ["Peanut butter Sandwich", "Take On", "work, shit, sleep"], "pickedBy": ["김예진"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EjisokuryClub%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "실리카겔", "display": "Silica Gel", "spotify": "https://open.spotify.com/artist/2kxVxKOgoefmgkwoHipHsn", "tracks": ["NO PAIN", "Tik Tak Tok (feat. So!YoON!)", "Desert Eagle"], "pickedBy": ["김주은"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3ESilica%20Gel%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "킹누", "display": "King Gnu", "spotify": "https://open.spotify.com/artist/6wxfx1yhyqjCPYwwxJktR2", "tracks": ["白日", "SPECIALZ", "一途"], "pickedBy": ["김채호"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EKing%20Gnu%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "alice merton", "display": "Alice Merton", "spotify": "https://open.spotify.com/artist/7f0OLhGgBMX9fUjm1dcPip", "tracks": ["No Roots", "Why So Serious", "Lash Out"], "pickedBy": ["남미경"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EAlice%20Merton%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "빅뱅", "display": "BIGBANG", "spotify": "https://open.spotify.com/artist/4Kxlr1PRlDKEB0ekOCyHgX", "tracks": ["BANG BANG BANG", "Haru Haru", "Fantastic Baby"], "pickedBy": ["박소영"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EBIGBANG%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "Alvaro Soler", "display": "Alvaro Soler", "spotify": "https://open.spotify.com/artist/2urF8dgLVfDjunO0pcHUEe", "tracks": ["Sofia", "La Cintura", "El Mismo Sol"], "pickedBy": ["원유미"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EAlvaro%20Soler%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "jayb", "display": "JAY B", "spotify": "https://open.spotify.com/artist/3IjHX8KZKoeq3X4QgXxqbT", "tracks": ["Switch It Up", "B.T.W (feat. Jay Park)", "Cloud nine"], "pickedBy": ["임훈정"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EJAY%20B%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "드렁큰타이거", "display": "Drunken Tiger", "spotify": "https://open.spotify.com/artist/1kcYSWblYWOOMVOPNgbMYI", "tracks": ["Timeless", "난 널 원해", "너희가 힙합을 아느냐?"], "pickedBy": ["채영미"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EDrunken%20Tiger%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "한로로", "display": "HANRORO", "spotify": "https://open.spotify.com/artist/5wVJpXzuKV6Xj7Yhsf2uYx", "tracks": ["0+0", "Let Me Love My Youth", "Landing in Love"], "pickedBy": ["최동욱", "카밀라"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EHANRORO%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "Laufey", "display": "Laufey", "spotify": "https://open.spotify.com/artist/7gW0r5CkdEUMm42w9XpyZO", "tracks": ["From The Start", "Falling Behind", "Let You Break My Heart Again"], "pickedBy": ["한다빈"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3ELaufey%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "잔나비", "display": "JANNABI", "spotify": "https://open.spotify.com/artist/2SY6OktZyMLdOnscX3DCyS", "tracks": ["for lovers who hesitate", "Summer", "dreams, books, power and walls"], "pickedBy": ["호프슈타트 파울"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EJANNABI%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "백예린", "display": "Yerin Baek", "spotify": "https://open.spotify.com/artist/6dhfy4ByARPJdPtMyrUYJK", "tracks": ["Here I Am Again", "Antifreeze", "Bye Bye My Blue"], "pickedBy": ["홍정욱"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%231A1B2E%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%236D5BA6%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%236D5BA6%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3EYerin%20Baek%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}, {"key": "나토리", "display": "natori", "spotify": "https://open.spotify.com/artist/6WmXWHmfBMhupyIs8MSqtu", "tracks": ["Overdose", "プロポーズ", "セレナーデ"], "pickedBy": ["이서진"], "fallback": "data:image/svg+xml;charset=UTF-8,%0A%20%20%20%20%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22700%22%20height%3D%22700%22%20viewBox%3D%220%200%20700%20700%22%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22700%22%20height%3D%22700%22%20fill%3D%22%2342426F%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22520%22%20cy%3D%22155%22%20r%3D%22120%22%20fill%3D%22%23F08A8A%22%20fill-opacity%3D%22.72%22/%3E%0A%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22535%22%20r%3D%22160%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.16%22/%3E%0A%20%20%20%20%20%20%3Cpath%20d%3D%22M75%20455%20C180%20315%2C280%20565%2C385%20385%20S565%20270%2C625%20115%22%20fill%3D%22none%22%20stroke%3D%22%23F08A8A%22%20stroke-width%3D%2217%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%2292%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%226%22%3EMUSIC%20ARCHIVE%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22590%22%20fill%3D%22%23FFD6C9%22%20font-size%3D%2250%22%20font-weight%3D%22800%22%20font-family%3D%22Arial%2C%20Noto%20Sans%20KR%2C%20sans-serif%22%3Enatori%3C/text%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2258%22%20y%3D%22632%22%20fill%3D%22%23FFD6C9%22%20fill-opacity%3D%22.62%22%20font-size%3D%2218%22%20font-family%3D%22Arial%2Csans-serif%22%20letter-spacing%3D%224%22%3EJS%20STUDIO%20PROJECT%3C/text%3E%0A%20%20%20%20%3C/svg%3E%0A%20%20%20%20"}];
+
+    const memberCards = document.getElementById("memberCards");
+    const searchInput = document.getElementById("searchInput");
+    const clearSearch = document.getElementById("clearSearch");
+    const resultCount = document.getElementById("resultCount");
+    const emptyState = document.getElementById("emptyState");
+
+    function esc(value) {
+      return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function googleSearch(q) {
+      return "https://www.google.com/search?q=" + encodeURIComponent(q);
+    }
+
+    function youtubeSearch(q) {
+      return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q);
+    }
+
+    function instagramUrl(handle) {
+      return "https://www.instagram.com/" + encodeURIComponent(handle) + "/";
+    }
+
+    function mapsSearch(name, address) {
+      return "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(name + " " + address);
+    }
+
+    /* NAME */
+    function renderNameCards() {
+      memberCards.innerHTML = "";
+
+      members.forEach((m) => {
+        const hasWork = m.work && m.work !== "미입력";
+        const hasArtist = m.artist && m.artist !== "미입력";
+        const hasFood = m.food && m.food !== "미입력";
+        const hasSns = Boolean(m.sns);
+
+        const card = document.createElement("article");
+        card.className = "member-card";
+        card.style.setProperty("--card-bg", m.scheme.main_bg);
+        card.style.setProperty("--card-text", m.scheme.main_text);
+        card.style.setProperty("--card-muted", m.scheme.muted);
+        card.style.setProperty("--btn-bg", m.scheme.button_bg);
+        card.style.setProperty("--btn-text", m.scheme.button_text);
+        card.style.setProperty("--side-bg", m.scheme.side_bg);
+        card.style.setProperty("--strip", m.scheme.strip);
+
+        card.dataset.search = [
+          m.name, m.food, m.residence, m.work, m.artist, m.sns
+        ].join(" ").toLowerCase();
+
+        card.innerHTML = `
+          <div class="member-main">
+            <div class="member-index">
+              <span>${m.index} / ${String(members.length).padStart(2,"0")}</span>
+              <span class="dots"><i></i><i></i></span>
+            </div>
+
+            <h3 class="member-name">${esc(m.name)}</h3>
+            <p class="member-location">${esc(m.residence || "미입력")}</p>
+
+            <div class="member-info">
+              <div class="info-row">
+                <div class="info-label">Food</div>
+                <div class="info-value">${hasFood ? esc(m.foodEmoji + " " + m.food) : "미입력"}</div>
+              </div>
+
+              <div class="info-row">
+                <div class="info-label">Recent</div>
+                <div class="info-value">
+                  <div class="inline">
+                    <span>${esc(m.work || "미입력")}</span>
+                    <a class="mini-btn ${hasWork ? "" : "disabled"}"
+                      href="${hasWork ? googleSearch(m.work) : "#"}"
+                      target="_blank" rel="noopener noreferrer">🎬</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-row">
+                <div class="info-label">Music</div>
+                <div class="info-value">
+                  <div class="inline">
+                    <span>${esc(m.artist || "미입력")}</span>
+                    <a class="mini-btn ${hasArtist ? "" : "disabled"}"
+                      href="${hasArtist ? youtubeSearch(m.artist) : "#"}"
+                      target="_blank" rel="noopener noreferrer">💿</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-row">
+                <div class="info-label">SNS</div>
+                <div class="info-value">
+                  ${hasSns
+                    ? `<a class="sns-link" href="${instagramUrl(m.sns)}" target="_blank" rel="noopener noreferrer">@${esc(m.sns)} ↗</a>`
+                    : `미입력`
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="member-strip"></div>
+          </div>
+
+          <div class="member-visual">
+            <img src="${m.nameVisual}" alt="${esc(m.name)} 개인 비주얼">
+          </div>
+        `;
+
+        memberCards.appendChild(card);
+      });
+    }
+
+    function filterCards() {
+      const q = searchInput.value.trim().toLowerCase();
+      let visible = 0;
+
+      document.querySelectorAll(".member-card").forEach((card) => {
+        const match = !q || card.dataset.search.includes(q);
+        card.classList.toggle("hidden", !match);
+        if (match) visible++;
+      });
+
+      resultCount.textContent = visible;
+      clearSearch.classList.toggle("show", Boolean(q));
+      emptyState.classList.toggle("show", visible === 0);
+    }
+
+    searchInput.addEventListener("input", filterCards);
+
+    clearSearch.addEventListener("click", () => {
+      searchInput.value = "";
+      searchInput.focus();
+      filterCards();
+    });
+
+    renderNameCards();
+
+    /* FOOD */
+    const foodGrid = document.getElementById("foodGrid");
+
+    foodItems.forEach((item) => {
+      const card = document.createElement("article");
+      card.className = "food-card";
+
+      const src = item.image || item.fallback;
+
+      card.innerHTML = `
+        <div class="food-image">
+          <img src="${src}" data-fallback="${item.fallback}" alt="${esc(item.food)} 사진">
+          <span class="food-emoji">${esc(item.emoji)}</span>
+        </div>
+
+        <div class="food-body">
+          <h3 class="food-name">${esc(item.food)}</h3>
+          <p class="food-picked">PICKED BY · ${esc(item.pickedBy.join(" · "))}</p>
+
+          <div class="restaurant-box">
+            <p class="restaurant-kicker">Recommended restaurant</p>
+            <p class="restaurant-name">${esc(item.restaurant.name)}</p>
+            <div class="restaurant-meta">
+              <span class="rating">★ ${esc(item.restaurant.rating)}</span>
+              <span>${esc(item.restaurant.address)}</span>
+            </div>
+            <a class="restaurant-btn"
+              href="${mapsSearch(item.restaurant.name, item.restaurant.address)}"
+              target="_blank" rel="noopener noreferrer">🍴 MAP</a>
+          </div>
+        </div>
+      `;
+
+      const img = card.querySelector("img");
+      img.addEventListener("error", () => {
+        if (img.src !== img.dataset.fallback) img.src = img.dataset.fallback;
+      });
+
+      foodGrid.appendChild(card);
+    });
+
+    /* RECENT */
+    const movieGrid = document.getElementById("movieGrid");
+
+    recentItems.forEach((item) => {
+      const card = document.createElement("article");
+      card.className = "movie-card";
+      const poster = item.poster || item.fallback;
+
+      card.innerHTML = `
+        <div class="poster">
+          <img src="${poster}" data-fallback="${item.fallback}" alt="${esc(item.display)} 포스터">
+        </div>
+
+        <div class="movie-info">
+          <h3 class="movie-title">${esc(item.display)}</h3>
+          <div class="movie-meta">
+            <span>${esc(item.year)}</span>
+            <span class="tomato">🍅 ${esc(item.rt)}</span>
+          </div>
+          <div class="picked">PICKED BY · ${esc(item.pickedBy.join(" · "))}</div>
+          <div class="movie-actions">
+            <a class="movie-btn" href="${googleSearch(item.display)}"
+              target="_blank" rel="noopener noreferrer">🎬 SEARCH</a>
+          </div>
+        </div>
+      `;
+
+      const img = card.querySelector("img");
+      img.addEventListener("error", () => {
+        if (img.src !== img.dataset.fallback) img.src = img.dataset.fallback;
+      });
+
+      movieGrid.appendChild(card);
+    });
+
+    /* MUSIC */
+    const musicGrid = document.getElementById("musicGrid");
+
+    async function loadSpotifyPhoto(img, spotifyUrl, fallback) {
+      if (!spotifyUrl) {
+        img.src = fallback;
+        return;
+      }
+
+      try {
+        const endpoint = "https://open.spotify.com/oembed?url=" + encodeURIComponent(spotifyUrl);
+        const res = await fetch(endpoint);
+        if (!res.ok) throw new Error("oEmbed unavailable");
+        const data = await res.json();
+        img.src = data.thumbnail_url || fallback;
+      } catch (error) {
+        img.src = fallback;
+      }
+    }
+
+    musicItems.forEach((item) => {
+      const card = document.createElement("article");
+      card.className = "artist-card";
+
+      const tracks = item.tracks.map((track, i) => `
+        <li>
+          <span class="track-no">0${i+1}</span>
+          <span>${esc(track)}</span>
+        </li>
+      `).join("");
+
+      card.innerHTML = `
+        <div class="artist-photo">
+          <img src="${item.fallback}" alt="${esc(item.display)} 아티스트 이미지">
+          ${item.spotify
+            ? `<a class="spotify-link" href="${item.spotify}" target="_blank" rel="noopener noreferrer">Spotify ↗</a>`
+            : ""
+          }
+        </div>
+
+        <div class="artist-body">
+          <h3 class="artist-name">${esc(item.display)}</h3>
+          <p class="artist-picked">PICKED BY · ${esc(item.pickedBy.join(" · "))}</p>
+
+          <ul class="track-list">
+            ${tracks}
+          </ul>
+
+          <div class="music-actions">
+            <a class="music-btn"
+              href="${youtubeSearch(item.display)}"
+              target="_blank" rel="noopener noreferrer">💿 SEARCH</a>
+          </div>
+        </div>
+      `;
+
+      const img = card.querySelector(".artist-photo img");
+      img.onerror = () => { img.src = item.fallback; };
+
+      musicGrid.appendChild(card);
+      loadSpotifyPhoto(img, item.spotify, item.fallback);
+    });
+
+    /* TABS / MAP */
+    let mapInitialized = false;
+    let map;
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".sheet").forEach(s => s.classList.remove("active"));
+
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.sheet).classList.add("active");
+
+        if (tab.dataset.sheet === "mapSheet") {
+          if (!mapInitialized) {
+            initMap();
+            mapInitialized = true;
+          } else {
+            setTimeout(() => map.invalidateSize(), 60);
+          }
+        }
+
+        window.scrollTo({
+          top:document.querySelector(".sheetbar").offsetTop - 6,
+          behavior:"smooth"
+        });
+      });
+    });
+
+    function initMap() {
+      map = L.map("map", {
+        scrollWheelZoom:true,
+        zoomControl:true
+      }).setView([37.58,127.02],10);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom:19,
+        attribution:"&copy; OpenStreetMap"
+      }).addTo(map);
+
+      const bounds = [];
+
+      locations.forEach((place) => {
+        const marker = L.circleMarker([place.lat,place.lng], {
+          radius:8,
+          color:"#1A1B2E",
+          weight:1.5,
+          fillColor:"#F08A8A",
+          fillOpacity:.92
+        }).addTo(map);
+
+        marker.bindPopup(`
+          <div class="popup-title">${esc(place.label)}</div>
+          <div>${esc(place.members.join(", "))}</div>
+        `);
+
+        bounds.push([place.lat,place.lng]);
+      });
+
+      if (bounds.length) {
+        map.fitBounds(bounds,{padding:[38,38],maxZoom:11});
+      }
+    }
+  </script>
+</body>
+</html>
